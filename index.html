@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lightning Companion</title>
+    <style>
+        :root {
+            /* Material You / Pixel Pretty Blue Palette */
+            --md-sys-color-primary: #0b57d0;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #d3e3fd;
+            --md-sys-color-on-primary-container: #041e49;
+            --md-sys-color-surface: #f8fdff;
+            --md-sys-color-surface-container: #e9f1f6;
+            --md-sys-color-on-surface: #191c20;
+            --md-sys-color-on-surface-variant: #42474e;
+            --md-sys-color-outline-variant: #c2c7ce;
+            
+            /* Unified Card Theme Colors */
+            --theme-card-bg: #eef4fb;
+            --theme-card-border: #d3e3fd;
+            --theme-btn-secondary-bg: #d3e3fd;
+            --theme-btn-secondary-text: #0b57d0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Google Sans", "Product Sans", Roboto, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            padding-top: env(safe-area-inset-top, 16px);
+            padding-bottom: calc(88px + env(safe-area-inset-bottom, 24px));
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        header {
+            padding: 24px 20px 16px;
+            background: var(--md-sys-color-surface);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        header h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.5px; line-height: 1.2; color: var(--md-sys-color-primary); }
+        header p { font-size: 14px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px; }
+        
+        main { padding: 0 16px; max-width: 600px; margin: 0 auto; }
+        
+        .sub-nav { display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding: 4px 2px; scrollbar-width: none; }
+        .sub-nav::-webkit-scrollbar { display: none; }
+        .sub-nav button {
+            background-color: var(--md-sys-color-surface-container);
+            border: 1px solid transparent;
+            padding: 0 20px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            white-space: nowrap;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .sub-nav button.active { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+
+        .card {
+            background: var(--theme-card-bg);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--theme-card-border);
+            transition: transform 0.1s ease;
+        }
+        .card:active { transform: scale(0.99); }
+        
+        .card-title { font-size: 18px; font-weight: 500; color: var(--md-sys-color-on-surface); margin-bottom: 4px; }
+        .card-meta { font-size: 14px; color: var(--md-sys-color-on-surface-variant); margin-top: 8px; margin-bottom: 12px; line-height: 1.5; }
+        
+        .card-backup { 
+            background: var(--md-sys-color-primary-container); 
+            padding: 14px 16px; 
+            border-radius: 20px; 
+            margin-bottom: 16px; 
+            border: 1px solid #b4cff9;
+        }
+        .card-backup-title { font-size: 13px; color: var(--md-sys-color-on-primary-container); font-weight: 500; margin-bottom: 10px; line-height: 1.4;}
+        .btn-backup {
+            background-color: rgba(255,255,255,0.6); 
+            color: var(--md-sys-color-primary); 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 13px; 
+            font-weight: 500; 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            cursor: pointer; 
+            height: 40px; 
+            padding: 0 8px;
+        }
+        .btn-backup:active { background-color: rgba(255,255,255,0.9); }
+
+        .card-alert { font-size: 13px; color: var(--md-sys-color-on-primary-container); background: #e3f2fd; padding: 12px 16px; border-radius: 16px; margin-bottom: 16px; font-weight: 500; border: 1px dashed #b4cff9;}
+        
+        .timing-block {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 16px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .timing-item { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .timing-label { font-size: 12px; color: var(--md-sys-color-on-surface-variant); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .timing-val { font-size: 17px; font-weight: 500; color: var(--md-sys-color-on-surface); height: 40px; display: flex; align-items: center; }
+        .timing-input {
+            font-size: 17px; font-weight: 500; color: var(--md-sys-color-primary); background: white; border: 1px solid var(--theme-card-border); border-radius: 10px; padding: 0 12px; height: 40px; width: 100%;
+        }
+
+        .action-row { display: flex; gap: 8px; }
+        
+        .btn-action {
+            background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: 9999px; font-size: 15px; font-weight: 500; flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; height: 56px;
+        }
+        .btn-secondary {
+            background-color: var(--theme-btn-secondary-bg); color: var(--theme-btn-secondary-text); border: none; border-radius: 9999px; font-size: 14px; font-weight: 500; flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; height: 56px; padding: 0 12px;
+        }
+        
+        .checkbox-container { display: flex; align-items: flex-start; gap: 16px; }
+        .checkbox-container input { width: 24px; height: 24px; margin-top: 2px; accent-color: var(--md-sys-color-primary); border-radius: 50%; }
+        .checkbox-container label { cursor: pointer; width: 100%; display: flex; flex-direction: column; gap: 4px;}
+        
+        .hidden { display: none !important; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--md-sys-color-surface-container); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom, 16px); padding-top: 12px; z-index: 100; border-top: 1px solid #dde7ef;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; width: 64px; color: var(--md-sys-color-on-surface-variant); cursor: pointer;}
+        .nav-item .icon-container { width: 64px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-item span { font-size: 12px; font-weight: 500; }
+        .nav-item.active { color: var(--md-sys-color-on-surface); }
+        .nav-item.active .icon-container { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+
+        .svg-defs { display: none; }
+    </style>
+</head>
+<body>
+
+    <svg class="svg-defs">
+        <defs>
+            <path id="icon-outbound" d="M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M14,14.5V12H3V10H14V7.5L17.5,11L14,14.5Z"/>
+            <path id="icon-inbound" d="M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M10,14.5L6.5,11L10,7.5V10H21V12H10V14.5Z"/>
+            <path id="icon-camps" d="M12,4L3,18H5L7,15H17L19,18H21L12,4M8.14,13L12,7L15.86,13H8.14Z"/>
+            <path id="icon-ikea" d="M12,18H6V14H12M21,14V12L20,7H4L3,12V14H4V20H14V14H18V20H20V14M20,4H4V6H20V4Z"/>
+            <path id="icon-nav" d="M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z"/>
+        </defs>
+    </svg>
+
+    <header>
+        <h1>Lightning Trip</h1>
+        <p>June 2026 Navigation Dashboard</p>
+    </header>
+
+    <main>
+        <!-- OUTBOUND LEG TAB -->
+        <div id="section-outbound">
+            <div class="sub-nav">
+                <button onclick="showDay('out', 1)" id="day-out-1" class="active">Day 1: Fri</button>
+                <button onclick="showDay('out', 2)" id="day-out-2">Day 2: Sat</button>
+                <button onclick="showDay('out', 3)" id="day-out-3">Day 3: Sun</button>
+            </div>
+
+            <!-- Day 1 Outbound -->
+            <div id="day-out-content-1" class="day-out-block">
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-1" onclick="saveCheckState(this.id)">
+                        <label for="check-out-1">
+                            <span class="card-title">Depart Indianola</span>
+                            <span class="card-meta">Start journey with 100% home charge.</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Depart</span>
+                            <input type="time" class="timing-input" id="dep-out-1-0" onchange="triggerCascade('out-1', 0)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-2" onclick="saveCheckState(this.id)">
+                        <label for="check-out-2">
+                            <span class="card-title">Hannibal, MO</span>
+                            <span class="card-meta">Casey's Supercharger<br>4215 McMasters Ave</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-1-1">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+45m)</span>
+                            <input type="time" class="timing-input" id="dep-out-1-1" onchange="triggerCascade('out-1', 1)">
+                        </div>
+                    </div>
+                    
+                    <div class="card-backup">
+                        <div class="card-backup-title">Backup: Walmart EVgo<br><span style="font-weight:400; color:var(--md-sys-color-on-surface-variant);">3650 Stardust Dr</span></div>
+                        <div class="action-row" style="margin-top:0;">
+                            <button class="btn-backup" onclick="startNav('3650 Stardust Dr, Hannibal, MO')">
+                                <svg style="width:16px;height:16px;fill:currentColor;"><use href="#icon-nav"></use></svg> Nav Backup
+                            </button>
+                            <button class="btn-backup" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Walmart+EVgo+3650+Stardust+Dr+Hannibal+MO')">Details</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('4215 McMasters Ave, Hannibal, MO')">
+                            <svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate
+                        </button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Caseys+4215+McMasters+Ave+Hannibal+MO')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-3" onclick="saveCheckState(this.id)">
+                        <label for="check-out-3">
+                            <span class="card-title">Sakatanoya Sushi</span>
+                            <span class="card-meta">St. Louis Corridor<br>6683 Delmar Blvd</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-1-2">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+90m)</span>
+                            <input type="time" class="timing-input" id="dep-out-1-2" onchange="triggerCascade('out-1', 2)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('6683 Delmar Blvd, University City, MO 63130')">
+                            <svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate
+                        </button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Sakatanoya+Sushi+6683+Delmar+Blvd')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-4" onclick="saveCheckState(this.id)">
+                        <label for="check-out-4">
+                            <span class="card-title">Archway RV Park</span>
+                            <span class="card-meta">Mt. Vernon, IL • 50A Utility</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-1-3">--:--</span>
+                        </div>
+                    </div>
+                    <div class="card-alert">💡 Pitch truck-bed tent before sunset.</div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Archway RV Park, Mt Vernon, IL')">
+                            <svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate
+                        </button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Archway+RV+Park+Mt+Vernon+IL')">Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 Outbound -->
+            <div id="day-out-content-2" class="day-out-block hidden">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div class="card-title">Depart Mt. Vernon</div>
+                            <div class="card-meta">Start with 100% full battery from camp.</div>
+                        </div>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Depart</span>
+                            <input type="time" class="timing-input" id="dep-out-2-0" onchange="triggerCascade('out-2', 0)">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-5" onclick="saveCheckState(this.id)">
+                        <label for="check-out-5">
+                            <span class="card-title">Clarksville, TN</span>
+                            <span class="card-meta">Steak 'n Shake NACS<br>2819 Wilma Rudolph Blvd</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-2-1">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+40m)</span>
+                            <input type="time" class="timing-input" id="dep-out-2-1" onchange="triggerCascade('out-2', 1)">
+                        </div>
+                    </div>
+
+                    <div class="card-backup">
+                        <div class="card-backup-title">Backup: Walmart EVgo<br><span style="font-weight:400; color:var(--md-sys-color-on-surface-variant);">3050 Wilma Rudolph Blvd</span></div>
+                        <div class="action-row" style="margin-top:0;">
+                            <button class="btn-backup" onclick="startNav('3050 Wilma Rudolph Blvd, Clarksville, TN')">
+                                <svg style="width:16px;height:16px;fill:currentColor;"><use href="#icon-nav"></use></svg> Nav Backup
+                            </button>
+                            <button class="btn-backup" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Walmart+EVgo+3050+Wilma+Rudolph+Blvd')">Details</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('2819 Wilma Rudolph Blvd, Clarksville, TN')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Steak+n+Shake+2819+Wilma+Rudolph+Blvd')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-6" onclick="saveCheckState(this.id)">
+                        <label for="check-out-6">
+                            <span class="card-title">Chattanooga, TN</span>
+                            <span class="card-meta">Airport Tesla Hub<br>1001 Airport Rd</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-2-2">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+35m)</span>
+                            <input type="time" class="timing-input" id="dep-out-2-2" onchange="triggerCascade('out-2', 2)">
+                        </div>
+                    </div>
+                    <div class="card-alert">⚠️ Time zone shifts to Eastern Time (+1 Hour)</div>
+                    
+                    <div class="card-backup">
+                        <div class="card-backup-title">Backup: Walmart EA<br><span style="font-weight:400; color:var(--md-sys-color-on-surface-variant);">2020 Gunbarrel Rd</span></div>
+                        <div class="action-row" style="margin-top:0;">
+                            <button class="btn-backup" onclick="startNav('2020 Gunbarrel Rd, Chattanooga, TN')">
+                                <svg style="width:16px;height:16px;fill:currentColor;"><use href="#icon-nav"></use></svg> Nav Backup
+                            </button>
+                            <button class="btn-backup" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Electrify+America+2020+Gunbarrel+Rd')">Details</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('1001 Airport Rd, Chattanooga, TN')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+1001+Airport+Rd+Chattanooga')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-7" onclick="saveCheckState(this.id)">
+                        <label for="check-out-7">
+                            <span class="card-title">Guru Revolving Sushi</span>
+                            <span class="card-meta">Midtown Atlanta Corridor</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-2-3">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+90m)</span>
+                            <input type="time" class="timing-input" id="dep-out-2-3" onchange="triggerCascade('out-2', 3)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Guru Revolving Sushi, Midtown Atlanta, GA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Guru+Revolving+Sushi+Atlanta')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-8" onclick="saveCheckState(this.id)">
+                        <label for="check-out-8">
+                            <span class="card-title">Stone Mountain Camp</span>
+                            <span class="card-meta">Atlanta Area • 50A Hookup Site</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-2-4">--:--</span>
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Stone Mountain Park Campground, Stone Mountain, GA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Stone+Mountain+Park+Campground')">Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 Outbound -->
+            <div id="day-out-content-3" class="day-out-block hidden">
+                <div class="card">
+                    <div class="card-title">Depart Atlanta Area</div>
+                    <div class="card-meta">Start final leg with 100% full battery stack.</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Depart</span>
+                            <input type="time" class="timing-input" id="dep-out-3-0" onchange="triggerCascade('out-3', 0)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-9" onclick="saveCheckState(this.id)">
+                        <label for="check-out-9">
+                            <span class="card-title">Cordele, GA</span>
+                            <span class="card-meta">Cordele Square Tesla<br>1013 E 16th St</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-3-1">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+35m)</span>
+                            <input type="time" class="timing-input" id="dep-out-3-1" onchange="triggerCascade('out-3', 1)">
+                        </div>
+                    </div>
+                    
+                    <div class="card-backup">
+                        <div class="card-backup-title">Backup: EVgo / Love's<br><span style="font-weight:400; color:var(--md-sys-color-on-surface-variant);">1615 E 16th St</span></div>
+                        <div class="action-row" style="margin-top:0;">
+                            <button class="btn-backup" onclick="startNav('1615 E 16th St, Cordele, GA')">
+                                <svg style="width:16px;height:16px;fill:currentColor;"><use href="#icon-nav"></use></svg> Nav Backup
+                            </button>
+                            <button class="btn-backup" onclick="openLink('https://www.google.com/maps/search/?api=1&query=EVgo+1615+E+16th+St+Cordele')">Details</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('1013 E 16th St, Cordele, GA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+1013+E+16th+St+Cordele')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-10" onclick="saveCheckState(this.id)">
+                        <label for="check-out-10">
+                            <span class="card-title">Lake City, FL</span>
+                            <span class="card-meta">Sun Stop Tesla NACS<br>14170 US-441</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-3-2">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+40m)</span>
+                            <input type="time" class="timing-input" id="dep-out-3-2" onchange="triggerCascade('out-3', 2)">
+                        </div>
+                    </div>
+
+                    <div class="card-backup">
+                        <div class="card-backup-title">Backup: Walmart EA<br><span style="font-weight:400; color:var(--md-sys-color-on-surface-variant);">2767 W US Hwy 90</span></div>
+                        <div class="action-row" style="margin-top:0;">
+                            <button class="btn-backup" onclick="startNav('2767 W US Hwy 90, Lake City, FL')">
+                                <svg style="width:16px;height:16px;fill:currentColor;"><use href="#icon-nav"></use></svg> Nav Backup
+                            </button>
+                            <button class="btn-backup" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Electrify+America+2767+W+US+Hwy+90')">Details</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('14170 US-441, Lake City, FL')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Sun+Stop+Tesla+Lake+City+FL')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-11" onclick="saveCheckState(this.id)">
+                        <label for="check-out-11">
+                            <span class="card-title">Ocala, FL</span>
+                            <span class="card-meta">Target Tesla Charger<br>2000 SW College Rd</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-3-3">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+20m)</span>
+                            <input type="time" class="timing-input" id="dep-out-3-3" onchange="triggerCascade('out-3', 3)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('2000 SW College Rd, Ocala, FL')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Target+Tesla+Ocala+FL')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-12" onclick="saveCheckState(this.id)">
+                        <label for="check-out-12">
+                            <span class="card-title">Clearwater RV Resort</span>
+                            <span class="card-meta">Clearwater, FL • Drop anchoring stabilizers early.</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-3-4">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+60m setup)</span>
+                            <input type="time" class="timing-input" id="dep-out-3-4" onchange="triggerCascade('out-3', 4)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Clearwater RV Resort, Clearwater, FL')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Clearwater+RV+Resort')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-out-13" onclick="saveCheckState(this.id)">
+                        <label for="check-out-13">
+                            <span class="card-title">Dinner: Kura Sushi</span>
+                            <span class="card-meta">Tampa Westshore Plaza<br>214 Westshore Plaza C-39</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-out-3-5">--:--</span>
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('214 Westshore Plaza C-39, Tampa, FL 33609')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Kura+Revolving+Sushi+Bar+Westshore+Tampa')">Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INBOUND LEG TAB -->
+        <div id="section-inbound" class="hidden">
+            <div class="sub-nav">
+                <button onclick="showDay('in', 1)" id="day-in-1" class="active">Day 1: Wed</button>
+                <button onclick="showDay('in', 2)" id="day-in-2">Day 2: Thu</button>
+                <button onclick="showDay('in', 3)" id="day-in-3">Day 3: Fri</button>
+            </div>
+
+            <!-- Day 1 Inbound -->
+            <div id="day-in-content-1" class="day-in-block">
+                <div class="card">
+                    <div class="card-title">Depart Clearwater</div>
+                    <div class="card-meta">Post-work wrap up. 100% state of charge.</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Depart</span>
+                            <input type="time" class="timing-input" id="dep-in-1-0" onchange="triggerCascade('in-1', 0)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Florida Corridor Chain</div>
+                    <div class="card-meta">Ocala (25m) ➔ Lake City (35m) ➔ Cordele (35m).</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-1-1">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+95m total)</span>
+                            <input type="time" class="timing-input" id="dep-in-1-1" onchange="triggerCascade('in-1', 1)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-1" onclick="saveCheckState(this.id)">
+                        <label for="check-in-1">
+                            <span class="card-title">Revolving Sushi Factory</span>
+                            <span class="card-meta">Alpharetta Corridor (North Atlanta Area)</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-1-2">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+90m)</span>
+                            <input type="time" class="timing-input" id="dep-in-1-2" onchange="triggerCascade('in-1', 2)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Revolving Sushi Factory, Alpharetta, GA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Revolving+Sushi+Factory+Alpharetta')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-2" onclick="saveCheckState(this.id)">
+                        <label for="check-in-2">
+                            <span class="card-title">Sweetwater Campground</span>
+                            <span class="card-meta">Canton, GA • Lake Allatoona Loop • 50A</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-1-3">--:--</span>
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Sweetwater Campground, Canton, GA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Sweetwater+Campground+Canton+GA')">Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 Inbound -->
+            <div id="day-in-content-2" class="day-in-block hidden">
+                <div class="card">
+                    <div class="card-title">Depart Canton, GA</div>
+                    <div class="card-meta">100% full battery from campground.</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Depart</span>
+                            <input type="time" class="timing-input" id="dep-in-2-0" onchange="triggerCascade('in-2', 0)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-3" onclick="saveCheckState(this.id)">
+                        <label for="check-in-3">
+                            <span class="card-title">Nashville, TN &amp; Lunch</span>
+                            <span class="card-meta">Target NACS • 6814 Charlotte Pike<br>Lunch: Sushi Train</span>
+                        </label>
+                    </div>
+                    <div class="card-alert">🕒 Gains 1 hour crossing back to Central Time.</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-2-1">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+50m)</span>
+                            <input type="time" class="timing-input" id="dep-in-2-1" onchange="triggerCascade('in-2', 1)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('6814 Charlotte Pike, Nashville, TN')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Sushi+Train+White+Bridge+Rd+Nashville')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-4" onclick="saveCheckState(this.id)">
+                        <label for="check-in-4">
+                            <span class="card-title">Louisville, KY</span>
+                            <span class="card-meta">Sullivan Univ Tesla • 2120 Gardiner Ln</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-2-2">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+35m)</span>
+                            <input type="time" class="timing-input" id="dep-in-2-2" onchange="triggerCascade('in-2', 2)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('2120 Gardiner Ln, Louisville, KY')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+2120+Gardiner+Ln+Louisville')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-5" onclick="saveCheckState(this.id)">
+                        <label for="check-in-5">
+                            <span class="card-title">Shoya Revolving Sushi</span>
+                            <span class="card-meta">Indianapolis Metro Corridor</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-2-3">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+85m)</span>
+                            <input type="time" class="timing-input" id="dep-in-2-3" onchange="triggerCascade('in-2', 3)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Shoya Revolving Sushi, Indianapolis, IN')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Shoya+Revolving+Sushi+Indianapolis')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-6" onclick="saveCheckState(this.id)">
+                        <label for="check-in-6">
+                            <span class="card-title">Indianapolis KOA</span>
+                            <span class="card-meta">Greenfield, IN • 50A Concrete Pads</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-2-4">--:--</span>
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('Indianapolis KOA, Greenfield, IN')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Indianapolis+KOA+Greenfield')">Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 Inbound -->
+            <div id="day-in-content-3" class="day-in-block hidden">
+                <div class="card">
+                    <div class="card-title">Depart Greenfield, IN</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Depart</span>
+                            <input type="time" class="timing-input" id="dep-in-3-0" onchange="triggerCascade('in-3', 0)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-7" onclick="saveCheckState(this.id)">
+                        <label for="check-in-7">
+                            <span class="card-title">Peoria, IL</span>
+                            <span class="card-meta">Hy-Vee Tesla • 4125 N Sheridan Rd</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-3-1">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+40m)</span>
+                            <input type="time" class="timing-input" id="dep-in-3-1" onchange="triggerCascade('in-3', 1)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('4125 N Sheridan Rd, Peoria, IL')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Peoria+IL')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="check-in-8" onclick="saveCheckState(this.id)">
+                        <label for="check-in-8">
+                            <span class="card-title">Davenport, IA</span>
+                            <span class="card-meta">Hy-Vee Tesla • 4064 E 53rd St</span>
+                        </label>
+                    </div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-3-2">--:--</span>
+                        </div>
+                        <div class="timing-item">
+                            <span class="timing-label">Depart (+35m)</span>
+                            <input type="time" class="timing-input" id="dep-in-3-2" onchange="triggerCascade('in-3', 2)">
+                        </div>
+                    </div>
+                    <div class="action-row">
+                        <button class="btn-action" onclick="startNav('4064 E 53rd St, Davenport, IA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                        <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Davenport+IA')">Details</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏡 Home Arrival</div>
+                    <div class="card-meta">Indianola, IA. Drive complete!</div>
+                    <div class="timing-block">
+                        <div class="timing-item">
+                            <span class="timing-label">Arrival</span>
+                            <span class="timing-val" id="arr-in-3-3">--:--</span>
+                        </div>
+                    </div>
+                    <button class="btn-action" onclick="startNav('Indianola, IA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAMPS TAB -->
+        <div id="section-camps" class="hidden">
+            <div class="card">
+                <div class="card-title">Archway RV Park</div>
+                <div class="card-meta">📍 Mt. Vernon, IL • Fri Outbound<br>50A Utility Connection</div>
+                <div class="action-row">
+                    <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Archway+RV+Park+Mt+Vernon+IL')">🗺️ Maps & Details</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Stone Mountain Park</div>
+                <div class="card-meta">📍 Atlanta, GA Area • Sat Outbound<br>50A Full Utilities</div>
+                <div class="action-row">
+                    <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Stone+Mountain+Park+Campground')">🗺️ Maps & Details</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Clearwater RV Resort</div>
+                <div class="card-meta">📍 Clearwater, FL • Sun Base Camp<br>50A Full Shore Power</div>
+                <div class="action-row">
+                    <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Clearwater+RV+Resort')">🗺️ Maps & Details</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Sweetwater Campground</div>
+                <div class="card-meta">📍 Canton, GA • Wed Inbound<br>Lake Allatoona 50A Loop</div>
+                <div class="action-row">
+                    <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Sweetwater+Campground+Canton+GA')">🗺️ Maps & Details</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Indianapolis KOA</div>
+                <div class="card-meta">📍 Greenfield, IN • Thu Inbound<br>50A Full Hookups</div>
+                <div class="action-row">
+                    <button class="btn-secondary" onclick="openLink('https://www.google.com/maps/search/?api=1&query=Indianapolis+KOA+Greenfield')">🗺️ Maps & Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- IKEA TAB -->
+        <div id="section-ikea" class="hidden">
+            <div class="card">
+                <div class="card-title">IKEA St. Louis</div>
+                <div class="card-meta">📍 Outbound Day 1 (St. Louis, MO)</div>
+                <div class="card-alert">~10 min detour from route. Great for a 3-hour shopping/lunch block.</div>
+                <div class="action-row">
+                    <button class="btn-action" onclick="startNav('1 IKEA Way, St. Louis, MO')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                    <button class="btn-secondary" onclick="openLink('https://www.ikea.com/us/en/stores/st-louis/')">Details</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">IKEA Atlanta (Atlantic Station)</div>
+                <div class="card-meta">📍 Outbound Day 2 (Atlanta, GA)</div>
+                <div class="card-alert">~5 min detour from Midtown route.</div>
+                <div class="action-row">
+                    <button class="btn-action" onclick="startNav('441 16th St NW, Atlanta, GA')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                    <button class="btn-secondary" onclick="openLink('https://www.ikea.com/us/en/stores/atlanta/')">Details</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">IKEA Fishers</div>
+                <div class="card-meta">📍 Inbound Day 2 (Indianapolis, IN)</div>
+                <div class="card-alert">~15 min detour (North Indy). Massive location with full dining amenities.</div>
+                <div class="action-row">
+                    <button class="btn-action" onclick="startNav('11400 IKEA Way, Fishers, IN')"><svg style="width:20px;height:20px;fill:currentColor;"><use href="#icon-nav"></use></svg> Navigate</button>
+                    <button class="btn-secondary" onclick="openLink('https://www.ikea.com/us/en/stores/fishers/')">Details</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Material You Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" id="btn-nav-outbound" onclick="switchNav('outbound')">
+            <div class="icon-container"><svg><use href="#icon-outbound"></use></svg></div>
+            <span>Outbound</span>
+        </button>
+        <button class="nav-item" id="btn-nav-inbound" onclick="switchNav('inbound')">
+            <div class="icon-container"><svg><use href="#icon-inbound"></use></svg></div>
+            <span>Inbound</span>
+        </button>
+        <button class="nav-item" id="btn-nav-camps" onclick="switchNav('camps')">
+            <div class="icon-container"><svg><use href="#icon-camps"></use></svg></div>
+            <span>Camps</span>
+        </button>
+        <button class="nav-item" id="btn-nav-ikea" onclick="switchNav('ikea')">
+            <div class="icon-container"><svg><use href="#icon-ikea"></use></svg></div>
+            <span>IKEA</span>
+        </button>
+    </nav>
+
+    <script>
+        const routes = {
+            'out-1': [
+                { stop: 0,  driveToNext: 195 }, 
+                { stop: 45, driveToNext: 150 }, 
+                { stop: 90, driveToNext: 150 }, 
+                { stop: 0,  driveToNext: 0   }  
+            ],
+            'out-2': [
+                { stop: 0,  driveToNext: 150 }, 
+                { stop: 40, driveToNext: 195 }, 
+                { stop: 35, driveToNext: 105 }, 
+                { stop: 90, driveToNext: 90  }, 
+                { stop: 0,  driveToNext: 0   }  
+            ],
+            'out-3': [
+                { stop: 0,  driveToNext: 150 }, 
+                { stop: 35, driveToNext: 165 }, 
+                { stop: 40, driveToNext: 105 }, 
+                { stop: 20, driveToNext: 60  }, 
+                { stop: 60, driveToNext: 60  }, 
+                { stop: 0,  driveToNext: 0   }  
+            ],
+            'in-1': [
+                { stop: 0,  driveToNext: 90  }, 
+                { stop: 95, driveToNext: 240 }, 
+                { stop: 90, driveToNext: 90  }, 
+                { stop: 0,  driveToNext: 0   }  
+            ],
+            'in-2': [
+                { stop: 0,  driveToNext: 180 }, 
+                { stop: 50, driveToNext: 225 }, 
+                { stop: 35, driveToNext: 95  }, 
+                { stop: 85, driveToNext: 85  }, 
+                { stop: 0,  driveToNext: 0   }  
+            ],
+            'in-3': [
+                { stop: 0,  driveToNext: 150 }, 
+                { stop: 40, driveToNext: 130 }, 
+                { stop: 35, driveToNext: 200 }, 
+                { stop: 0,  driveToNext: 0   }  
+            ]
+        };
+
+        window.onload = function() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(box => {
+                const saved = localStorage.getItem(box.id);
+                if (saved === 'true') box.checked = true;
+            });
+            
+            Object.keys(routes).forEach(dayKey => {
+                initDayTimes(dayKey);
+            });
+        };
+
+        function saveCheckState(id) {
+            localStorage.setItem(id, document.getElementById(id).checked);
+        }
+
+        function addMinutes(timeStr, mins) {
+            let [h, m] = timeStr.split(':').map(Number);
+            let d = new Date();
+            d.setHours(h, m, 0, 0);
+            d = new Date(d.getTime() + mins * 60000);
+            let outH = d.getHours().toString().padStart(2, '0');
+            let outM = d.getMinutes().toString().padStart(2, '0');
+            return `${outH}:${outM}`;
+        }
+
+        function format12Hour(timeStr) {
+            let [h, m] = timeStr.split(':').map(Number);
+            let ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+        }
+
+        function initDayTimes(dayKey) {
+            let route = routes[dayKey];
+            let currentDep = localStorage.getItem(`dep-${dayKey}-0`) || "10:30";
+            document.getElementById(`dep-${dayKey}-0`).value = currentDep;
+
+            for (let i = 1; i < route.length; i++) {
+                let arrTime = addMinutes(currentDep, route[i-1].driveToNext);
+                let arrEl = document.getElementById(`arr-${dayKey}-${i}`);
+                if (arrEl) arrEl.innerText = format12Hour(arrTime);
+
+                let depEl = document.getElementById(`dep-${dayKey}-${i}`);
+                if (depEl) {
+                    let savedDep = localStorage.getItem(`dep-${dayKey}-${i}`);
+                    if (savedDep) {
+                        depEl.value = savedDep;
+                        currentDep = savedDep;
+                    } else {
+                        let depTime = addMinutes(arrTime, route[i].stop);
+                        depEl.value = depTime;
+                        currentDep = depTime;
+                    }
+                }
+            }
+        }
+
+        function triggerCascade(dayKey, changedNodeIndex) {
+            let depEl = document.getElementById(`dep-${dayKey}-${changedNodeIndex}`);
+            localStorage.setItem(`dep-${dayKey}-${changedNodeIndex}`, depEl.value);
+            
+            let route = routes[dayKey];
+            for (let i = changedNodeIndex + 1; i < route.length; i++) {
+                localStorage.removeItem(`dep-${dayKey}-${i}`);
+            }
+            
+            initDayTimes(dayKey);
+        }
+
+        function switchNav(tabId) {
+            document.getElementById('section-outbound').classList.add('hidden');
+            document.getElementById('section-inbound').classList.add('hidden');
+            document.getElementById('section-camps').classList.add('hidden');
+            document.getElementById('section-ikea').classList.add('hidden');
+            
+            document.getElementById('btn-nav-outbound').classList.remove('active');
+            document.getElementById('btn-nav-inbound').classList.remove('active');
+            document.getElementById('btn-nav-camps').classList.remove('active');
+            document.getElementById('btn-nav-ikea').classList.remove('active');
+            
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+            document.getElementById('btn-nav-' + tabId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function showDay(type, dayNum) {
+            const blocks = document.querySelectorAll('.day-' + type + '-block');
+            blocks.forEach(b => b.classList.add('hidden'));
+            for(let i=1; i<=3; i++) {
+                document.getElementById('day-' + type + '-' + i).classList.remove('active');
+            }
+            document.getElementById('day-' + type + '-content-' + dayNum).classList.remove('hidden');
+            document.getElementById('day-' + type + '-' + dayNum).classList.add('active');
+        }
+
+        function startNav(destination) {
+            window.location.href = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(destination);
+        }
+        
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
